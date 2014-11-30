@@ -1,0 +1,85 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require_relative '../../xt/preamble.rb'
+require_relative '../../xt/butcher_monkeypatch.rb'
+
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'docker'
+ENV['VAGRANT_LOG'] = 'info'
+ENV['CHEF_LOG'] = 'info'
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+######################################################
+#                                                    #
+#             CONTAINER-WORKSTATION-LOCAL            #
+#             ***************************            #
+#                                                    #
+######################################################
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  # Checks prequisites and plugins
+  pre = Preamble.new(config)
+  
+  config.vm.define 'container-local-workstation' do |ws|
+    
+    # Chef-Workstation
+    ws.vm.hostname = 'container-local-workstation'
+    ws.vm.network "private_network", ip: "192.168.1.3"
+    config.vm.network :forwarded_port,
+      guest: 22,
+      host: 2202,
+      id: "ssh",
+      auto_correct: true
+    ws.vm.boot_timeout = 200
+    #ws.ssh.username = "vagrant"
+    #ws.ssh.private_key_path = "../key.pem"
+    ws.ssh.port = 22
+    ws.ssh.guest_port = 22
+    
+    
+    ws.vm.provider "docker" do |d|
+      # Parameter docs: https://docs.vagrantup.com/v2/docker/configuration.html
+      #d.privileged = true
+      #d.build_dir = "."
+      # Volumes synced from host VM to container
+      d.volumes = ["/data:/data", "/vagrant/chef-repo:/home/vagrant/chef-repo"]
+      d.image = "yserz/docker-vagrant-centos-7-minivm"
+      # d.create_args = ["-e", "  SSH_PORT=23"]
+      # d.env = {
+      #   "SSH_PORT" => 23
+      # }
+      d.vagrant_machine = "vm-chef-server"
+      d.vagrant_vagrantfile = "../Vagrantfile"
+      d.force_host_vm = true
+      d.has_ssh = true
+    end
+    
+    CHEF_JSON = JSON.parse(Pathname(__FILE__).dirname.join('.', 'chef.json').read)
+    
+    ws.vm.provision "chef_client" do |chef|
+      # Solves the Chef SSL warning
+      # http://stackoverflow.com/questions/22991561/chef-solo-ssl-warning-when-provisioning
+      # Note: This function needs a SSL-Certificate installed in Chef-Server
+      #chef.custom_config_path = "vagrant_chef_config"
+      
+      #chef.encrypted_data_bag_secret_key_path = "../data_bag_key.pem"
+      chef.chef_server_url = "https://192.168.1.2:9191/"
+      chef.validation_key_path = "../../data/credentials/chef/chef-validator.pem" # scope local
+      #chef.client_key_path = "/vagrant/local-workstation.pem"
+      #chef.log_level = :info
+      
+      CHEF_JSON['run_list'].each do |recipe|
+        puts recipe
+        chef.add_recipe(recipe)
+      end if CHEF_JSON['run_list']
+      
+      chef.run_list = CHEF_JSON.delete('run_list')
+      chef.json = CHEF_JSON
+    end
+    
+    ws.vm.provision "shell" do |s|
+       p = File.expand_path("../../", __FILE__)
+       s.path = p + "/data/scripts/chef/init_knife"
+     end
+  end
+end

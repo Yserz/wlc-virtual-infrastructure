@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# vagrant command proxy
+# function vagrant () {
+# 	echo "vagrant-bindfs (0.3.2)"
+# 	echo "vagrant-butcher (2.2.0)"
+# 	#echo "vagrant-cachier (1.1.0)"
+# 	echo "vagrant-login (1.0.1, system)"
+# 	echo "vagrant-omnibus (1.4.1)"
+# 	echo "vagrant-share (1.1.2, system)"
+# 	echo "vagrant-triggers (0.4.3)"
+# 	#echo "vagrant-vbguest (0.10.0)"
+# }
+
+PLUGINS=$(vagrant plugin list)
+echo -e "All Plugins: \n$PLUGINS"
+PLUGINS_ARRAY=(${PLUGINS//$'\n'/ })
+
+function isPluginNotInstalled {
+  local e
+  for e in "${@:2}"; do [[ "$e" =~ ^"$1" ]] && return 0; done
+  return 1
+}
+
+if isPluginNotInstalled "vagrant-cachier" "${PLUGINS_ARRAY[@]}" ; then
+	echo "Installing plugin vagrant-cachier"
+	#vagrant plugin install vagrant-cachier
+fi
+if isPluginNotInstalled "vagrant-omnibus" "${PLUGINS_ARRAY[@]}" ; then
+	echo "Installing plugin vagrant-omnibus"
+	#vagrant plugin install vagrant-omnibus
+fi
+if isPluginNotInstalled "vagrant-vbguest" "${PLUGINS_ARRAY[@]}" ; then
+	echo "Installing plugin vagrant-vbguest"
+	#vagrant plugin install vagrant-vbguest
+fi
+if isPluginNotInstalled "vagrant-butcher" "${PLUGINS_ARRAY[@]}" ; then
+	echo "Installing plugin vagrant-butcher"
+	#vagrant plugin install vagrant-butcher
+fi

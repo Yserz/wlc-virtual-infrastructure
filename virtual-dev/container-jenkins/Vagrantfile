@@ -1,0 +1,90 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require_relative '../../xt/preamble.rb'
+require_relative '../../xt/butcher_monkeypatch.rb'
+require_relative '../../xt/browser.rb'
+
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'docker'
+ENV['VAGRANT_LOG'] = 'info'
+ENV['CHEF_LOG'] = 'info'
+VAGRANTFILE_API_VERSION = "2"
+
+######################################################
+#                                                    #
+#                 CONTAINER-JENKINS                  #
+#                 *****************                  #
+#                                                    #
+######################################################
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  # Checks prequisites and plugins
+  pre = Preamble.new(config)
+  # Disable cache because of failing JDK installation
+  config.cache.auto_detect = false
+  
+  {
+    [:up] => "http://192.168.2.2:8080/",
+    [:provision] => "http://192.168.2.2:8080/",
+    [:resume] => "http://192.168.2.2:8080/",
+    #[:suspend] => "",
+    #[:halt] => "",
+    #[:destroy] => ""
+  }.each do |command, trigger|
+    config.trigger.after command, :stdout => true, :force => true do
+      Browser.new().open(trigger)
+    end
+  end
+
+  config.vm.define 'container-jenkins' do |jk|
+    
+    # Chef-Workstation
+    jk.vm.hostname = 'container-jenkins'
+    jk.vm.network "private_network", ip: "192.168.2.3"
+    jk.vm.network :forwarded_port,
+      guest: 22,
+      host: 2201,
+      id: "ssh",
+      auto_correct: true
+    #ws.ssh.username = "vagrant"
+    #v.ssh.private_key_path = "../key.pem"
+    jk.ssh.port = 22
+    jk.ssh.guest_port = 22
+    
+    jk.vm.provider "docker" do |d|
+      # Parameter docs: https://docs.vagrantup.com/v2/docker/configuration.html
+      #d.privileged = true
+      #d.build_dir = "."
+      d.volumes = ["/data:/data:ro"]
+      d.ports = ["8080:8080"]
+      d.image = "yserz/docker-vagrant-centos-7-minivm"
+      d.expose = [8080]
+      d.vagrant_machine = "vm-dev-host"
+      d.vagrant_vagrantfile = "../Vagrantfile"
+      d.force_host_vm = true
+      d.has_ssh = true
+    end
+    
+    CHEF_JSON = JSON.parse(Pathname(__FILE__).dirname.join('.', 'chef.json').read)
+    
+    jk.vm.provision "chef_client" do |chef|
+      # Solves the Chef SSL warning
+      # http://stackoverflow.com/questions/22991561/chef-solo-ssl-warning-when-provisioning
+      # Note: This function needs a SSL-Certificate installed in Chef-Server
+      #chef.custom_config_path = "vagrant_chef_config"
+      
+      #chef.encrypted_data_bag_secret_key_path = "../data_bag_key.pem"
+      chef.chef_server_url = "https://192.168.1.2:9191/"
+      chef.validation_key_path = "../../data/credentials/chef/chef-validator.pem"
+      #chef.client_key_path = "/vagrant/local-workstation.pem"
+      #chef.log_level = :info
+      
+      CHEF_JSON['run_list'].each do |recipe|
+        puts recipe
+        chef.add_recipe(recipe)
+      end if CHEF_JSON['run_list']
+      
+      chef.run_list = CHEF_JSON.delete('run_list')
+      chef.json = CHEF_JSON
+    end
+  end
+end

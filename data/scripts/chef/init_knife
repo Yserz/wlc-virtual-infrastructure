@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# scope guest VM
+
+copyKnifeRB(){
+	local new_knife_rb_path=$1
+	local target="/home/vagrant/.chef/knife.rb"
+	mkdir -p /home/vagrant/.chef/ && /bin/cp -rf $new_knife_rb_path $target
+	sed -i -e "$a\node_name                '$HOSTNAME'" $target
+}
+
+sudo su vagrant
+
+echo "INFO: ######################   COPYING CHEF CLIENT CONFIG          ###################### "
+copyKnifeRB /data/configs/chef/client_knife.rb
+
