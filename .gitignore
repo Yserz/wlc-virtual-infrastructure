@@ -34,6 +34,7 @@ $RECYCLE.BIN/
 
 data/credentials/**
 data/logs/**
+!data/logs/.gitkeep
 .rsync_ignore
 virtual-wlc-test/**
 basevm/**
