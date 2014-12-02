@@ -11,3 +11,13 @@ if [ -r /etc/sysconfig/network-scripts/ifcfg-eth0 ]; then
   sed -i 's/^HWADDR.*$//' /etc/sysconfig/network-scripts/ifcfg-eth0
   sed -i 's/^UUID.*$//' /etc/sysconfig/network-scripts/ifcfg-eth0
 fi
+
+# Cleanup log files
+find /var/log -type f | while read f; do echo -ne '' > $f; done;
+
+# Remove bash history
+unset HISTFILE
+rm -f /root/.bash_history
+rm -f /home/vagrant/.bash_history
+
+

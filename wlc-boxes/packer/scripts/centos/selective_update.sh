@@ -38,7 +38,7 @@
 # Upgrade      26 Package(s)
 
 
-yum -y update kernel openssh wget tzdata
+yum -y update device-mapper openssh openssl wget tzdata initscripts
 
 echo "Rebooting the machine..."
 reboot
