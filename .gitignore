@@ -34,7 +34,9 @@ $RECYCLE.BIN/
 
 data/credentials/**
 data/logs/**
+# Keep log directories
 !data/logs/.gitkeep
+!data/logs/chef-server/.gitkeep
 .rsync_ignore
 virtual-wlc-test/**
 basevm/**
