@@ -1,6 +1,6 @@
 CACHE_DIR=/tmp/vagrant-cache/docker/images
 echo "cache dir=$CACHE_DIR"
-mkdir -p $CACHE_DIR
+[ -d $CACHE_DIR ] || mkdir -p $CACHE_DIR
 echo "#####################"
 
 IMAGES=$(docker images -q)

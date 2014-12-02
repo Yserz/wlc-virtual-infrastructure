@@ -6,8 +6,8 @@ class Preamble
   attr_accessor :is_windows
   @is_windows
   
-  def initialize(config)
-    Vagrant.require_version ">= 1.6.5"
+  def initialize(config, version)
+    Vagrant.require_version version
   
     # Detects Windows ;P
     @is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
@@ -15,50 +15,26 @@ class Preamble
     
     
     # Detects vagrant-triggers plugin
-    if Vagrant.has_plugin?('vagrant-triggers')
-      puts 'INFO:  Vagrant-triggers plugin detected.'
-    else
+    if !Vagrant.has_plugin?('vagrant-triggers')
       Preamble.Preamble.confirmAndInstall("triggers")
     end
     
     # Detects vagrant-cachier plugin
-    if Vagrant.has_plugin?('vagrant-cachier')
-      puts 'INFO:  Vagrant-cachier plugin detected. Optimizing caches.'
-      # Configure cached packages to be shared between instances of the same base box.
-      # More info on http://fgrehm.viewdocs.io/vagrant-cachier/usage
-      config.cache.scope = :box
-    else
+    if !Vagrant.has_plugin?('vagrant-cachier')
       Preamble.Preamble.confirmAndInstall("cachier")
     end
   
     # Detects vagrant-omnibus plugin
-    if Vagrant.has_plugin?('vagrant-omnibus')
-      puts 'INFO:  Vagrant-omnibus plugin detected.'
-      # config.omnibus.install_url = 'http://acme.com/install.sh'
-      config.omnibus.chef_version = "11.16.4" # :latest
-    else
+    if !Vagrant.has_plugin?('vagrant-omnibus')
       Preamble.confirmAndInstall("omnibus")
     end
     # Detects vagrant-vbguest plugin
-    if Vagrant.has_plugin?('vagrant-vbguest')
-      puts 'INFO:  Vagrant-vbguest plugin detected.'
-      #config.vbguest.auto_update = false
-      # do NOT download the iso file from a webserver
-      config.vbguest.no_remote = true
-      # Whether to check the correct additions version only.
-      config.vbguest.no_install = true
-    else
+    if !Vagrant.has_plugin?('vagrant-vbguest')
       Preamble.confirmAndInstall("vbguest")
     end
     
     # Detects vagrant-butcher plugin
-    if Vagrant.has_plugin?('vagrant-butcher')
-      puts 'INFO:  Vagrant-butcher plugin detected.'
-      config.butcher.enabled = true # Default
-      config.butcher.verify_ssl = false
-      #config.butcher.client_key = "local-workstation.pem"
-      #config.butcher.client_name = "root"
-    else
+    if !Vagrant.has_plugin?('vagrant-butcher')
       Preamble.confirmAndInstall("butcher")
     end
     

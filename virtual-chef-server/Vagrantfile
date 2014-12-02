@@ -30,12 +30,34 @@ end
 ######################################################
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Checks prequisites and plugins
-  pre = Preamble.new(config)
+  pre = Preamble.new(config, ">= 1.6.5")
+  
+  ######### CACHIER
+  # Configure cached packages to be shared between instances of the same base box.
+  # More info on http://fgrehm.viewdocs.io/vagrant-cachier/usage
+  config.cache.scope = :box
+  
+  ######### OMNIBUS
+  # config.omnibus.install_url = 'http://acme.com/install.sh'
+  config.omnibus.chef_version = "11.16.4" # :latest
+  
+  ######### VBGUEST
+  #config.vbguest.auto_update = false
+  # do NOT download the iso file from a webserver
+  config.vbguest.no_remote = true
+  # Whether to check the correct additions version only.
+  config.vbguest.no_install = true
+  
+  ######### BUTCHER
+  config.butcher.enabled = true # Default
+  config.butcher.verify_ssl = false
+  #config.butcher.client_key = "local-workstation.pem"
+  #config.butcher.client_name = "root"
   
   # Calculate Resources
   hard = Hardware.new(8, 6144) # CPUs, RAM
   using_cpus = hard.processing_units
-  using_memory = hard.memory_mb / 4 # 1/2 RAM
+  using_memory = hard.memory_mb / 4 # 1/4 RAM
   puts "Found #{hard.processing_units} Cores. Using #{using_cpus} Cores"
   puts "Found #{hard.memory_mb} MB Memory. Using #{using_memory} MB Memory"
   
@@ -58,7 +80,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network :forwarded_port, guest: 9191, host: 9191
   
   config.vm.synced_folder "../data/", "/data"
-  config.vm.synced_folder "../data/logs/", "/var/log"
+  config.vm.synced_folder "../data/logs/chef-server/", "/var/log/chef-server"
   
   config.vm.provider "virtualbox" do |vb|
     vb.name = "vm-chef-server"
@@ -80,7 +102,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "vm-chef-server" do |host|
     host.vm.hostname = "vm-chef-server"
     #host.vm.post_up_message = 'Welcome to the We Love Coding: Chef-Server!'
-    #host.vm.box_url = "file://../wlc-boxes/builds/virtualbox/wlc_centos-6.6_chef-11.16.4_docker-1.3.1.box"
+    #host.vm.box_url = "file://../wlc-boxes/builds/virtualbox/wlc_0.1.0_centos-6.6_chef-11.16.4.box"
+    #host.vm.box_url = "https://googledrive.com/host/0B1Rrb7yxWPvLOVMwVTMzd1pnMW8/wlc_0.1.0_centos-6.6_x86_64_chef-11.16.4.box"
     host.vm.box = "wlc/centos-6.6"
     #host.vm.box = "chef/centos-6.6"
     #host.ssh.username = "vagrant"
