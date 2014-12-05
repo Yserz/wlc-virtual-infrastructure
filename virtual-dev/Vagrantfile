@@ -54,6 +54,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #config.butcher.client_key = "local-workstation.pem"
   #config.butcher.client_name = "root"
   
+  
   # Calculate Resources
   hard = Hardware.new(8, 6144) # CPUs, RAM
   using_cpus = hard.processing_units
@@ -101,13 +102,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "vm-dev-host" do |host|
     host.vm.hostname = "vm-dev-host"
     #host.vm.post_up_message = 'Welcome to the We Love Coding: VM-DEV-HOST!'
-    host.vm.box = "wlc/centos-6.6"
+    host.vm.box = "chef/centos-7.0"
     #host.ssh.username = "vagrant"
+    
+    # fix "System is booting up. See pam_nologin(8)"
+    host.vm.provision "shell", inline: "sudo sed -i -r 's/^(.*pam_nologin.so)/#\1/' /etc/pam.d/sshd"
+    host.vm.provision "shell", inline: "sudo rm -rf /run/nologin"
+    # TODO may turn pam_nologin on again
     
     host.vm.provision "docker"
     host.vm.provision "shell", path: "../data/scripts/docker/docker_load_images"
     host.vm.provision "docker" do |d|
-      d.build_image "/data/minivm", args: "-t yserz/docker-vagrant-centos-7-minivm"
+      d.build_image "/data/minivm_sysd", args: "-t yserz/docker-vagrant-centos-7-minivm"
       d.version = :latest # Default is :latest
     end
     host.vm.provision "shell", path: "../data/scripts/docker/docker_save_images"
@@ -119,6 +125,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       #   run_remote "sudo chmod 755 /vagrant/docker_save_images && /vagrant/docker_save_images"
       # end
     end
+    
+    
     
     CHEF_JSON = JSON.parse(Pathname(__FILE__).dirname.join('.', 'chef.json').read)
     
@@ -141,10 +149,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       
       chef.run_list = CHEF_JSON.delete('run_list')
       chef.json = CHEF_JSON
-    end
-    host.vm.provision "shell" do |s|
-     p = File.expand_path("../../", __FILE__)
-     s.path = p + "/data/scripts/chef/init_knife"
     end
   end
 end

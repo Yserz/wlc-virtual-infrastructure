@@ -75,3 +75,4 @@ Further Reading
 * [Vagrant Chef Solo & Client Properties](http://docs.vagrantup.com/v2/provisioning/chef_common.html)
 * [chef-server.rb optional settings](https://docs.getchef.com/config_rb_chef_server_optional_settings.html)
 * [Chef Server Configuration](https://www.getchef.com/blog/2013/03/11/chef-11-server-up-and-running/)
+* [VBoxManage Commands](https://www.virtualbox.org/manual/ch08.html)

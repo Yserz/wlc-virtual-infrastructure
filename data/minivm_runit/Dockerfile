@@ -3,12 +3,9 @@ FROM centos:centos7
 MAINTAINER Michael Koppen <michael.koppen@googlemail.com>
 
 #ENV container docker
-ENV SSH_PORT 22
-
-RUN echo "SSH_PORT: $SSH_PORT"
 
 # Update without kernel
-RUN yum -y -q -x 'kernel*' update
+#RUN yum -y -q -x 'kernel*' update
 
 # Installing Utilities
 # ---------------------*
@@ -54,7 +51,6 @@ RUN chown root.root /etc/service/rsyslogd/run; \
 RUN yum install -y -q openssh-server
 RUN mkdir -p /var/run/sshd
 ADD /build/config/sshd_config /etc/ssh/sshd_config
-RUN echo "Port \$SSH_PORT" >>  /etc/ssh/sshd_config
 # Generating standard RSA, DSA and ECDSA keys
 # TODO ONBUILD ??
 RUN ssh-keygen -A
@@ -101,4 +97,4 @@ RUN groupadd \
 RUN yum clean all
 
 CMD ["/usr/sbin/runsvdir-start"]
-EXPOSE $SSH_PORT
+EXPOSE 22

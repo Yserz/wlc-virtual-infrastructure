@@ -18,9 +18,31 @@ VAGRANTFILE_API_VERSION = "2"
 ######################################################
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Checks prequisites and plugins
-  pre = Preamble.new(config)
+  pre = Preamble.new(config, ">= 1.6.5")
+  
+  ######### CACHIER
+  # Configure cached packages to be shared between instances of the same base box.
+  # More info on http://fgrehm.viewdocs.io/vagrant-cachier/usage
   # Disable cache because of failing JDK installation
   config.cache.auto_detect = false
+  
+  ######### OMNIBUS
+  # config.omnibus.install_url = 'http://acme.com/install.sh'
+  config.omnibus.chef_version = "11.16.4" # :latest
+  
+  ######### VBGUEST
+  #config.vbguest.auto_update = false
+  # do NOT download the iso file from a webserver
+  config.vbguest.no_remote = true
+  # Whether to check the correct additions version only.
+  config.vbguest.no_install = true
+  
+  ######### BUTCHER
+  config.butcher.enabled = true # Default
+  config.butcher.verify_ssl = false
+  #config.butcher.client_key = "local-workstation.pem"
+  #config.butcher.client_name = "root"
+  
   
   {
     [:up] => "http://192.168.2.2:8080/",
@@ -39,25 +61,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     
     # Chef-Workstation
     jk.vm.hostname = 'container-jenkins'
-    jk.vm.network "private_network", ip: "192.168.2.3"
+    jk.vm.network "private_network", ip: "192.168.2.5"
     jk.vm.network :forwarded_port,
       guest: 22,
-      host: 2201,
+      host: 2202,
       id: "ssh",
       auto_correct: true
     #ws.ssh.username = "vagrant"
     #v.ssh.private_key_path = "../key.pem"
-    jk.ssh.port = 22
-    jk.ssh.guest_port = 22
+    jk.ssh.host = "localhost"
+    jk.ssh.port = 2202
     
     jk.vm.provider "docker" do |d|
-      # Parameter docs: https://docs.vagrantup.com/v2/docker/configuration.html
-      #d.privileged = true
-      #d.build_dir = "."
-      d.volumes = ["/data:/data:ro"]
+      d.privileged = true
+      d.volumes = ["/data:/data:ro", "/sys/fs/cgroup:/sys/fs/cgroup:ro"]
       d.ports = ["8080:8080"]
       d.image = "yserz/docker-vagrant-centos-7-minivm"
-      d.expose = [8080]
+      d.expose = [22, 8080]
       d.vagrant_machine = "vm-dev-host"
       d.vagrant_vagrantfile = "../Vagrantfile"
       d.force_host_vm = true

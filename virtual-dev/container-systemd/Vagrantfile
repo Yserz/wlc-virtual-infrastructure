@@ -3,51 +3,80 @@
 
 require_relative '../../xt/preamble.rb'
 require_relative '../../xt/butcher_monkeypatch.rb'
+require_relative '../../xt/browser.rb'
 
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'docker'
 ENV['VAGRANT_LOG'] = 'info'
 ENV['CHEF_LOG'] = 'info'
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
 ######################################################
 #                                                    #
-#             CONTAINER-WORKSTATION-LOCAL            #
-#             ***************************            #
+#                 CONTAINER-JENKINS                  #
+#                 *****************                  #
 #                                                    #
 ######################################################
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Checks prequisites and plugins
-  pre = Preamble.new(config)
+  pre = Preamble.new(config, ">= 1.6.5")
   
-  config.vm.define 'container-local-workstation' do |ws|
+  ######### CACHIER
+  # Configure cached packages to be shared between instances of the same base box.
+  # More info on http://fgrehm.viewdocs.io/vagrant-cachier/usage
+  config.cache.scope = :box
+  
+  ######### OMNIBUS
+  # config.omnibus.install_url = 'http://acme.com/install.sh'
+  config.omnibus.chef_version = "11.16.4" # :latest
+  
+  ######### VBGUEST
+  #config.vbguest.auto_update = false
+  # do NOT download the iso file from a webserver
+  config.vbguest.no_remote = true
+  # Whether to check the correct additions version only.
+  config.vbguest.no_install = true
+  
+  ######### BUTCHER
+  config.butcher.enabled = true # Default
+  config.butcher.verify_ssl = false
+  #config.butcher.client_key = "local-workstation.pem"
+  #config.butcher.client_name = "root"
+  
+  
+  {
+    #[:up] => "http://192.168.2.5:8080/",
+    #[:provision] => "http://192.168.2.5:8080/",
+    #[:resume] => "http://192.168.2.5:8080/",
+    #[:suspend] => "",
+    #[:halt] => "",
+    #[:destroy] => ""
+  }.each do |command, trigger|
+    config.trigger.after command, :stdout => true, :force => true do
+      Browser.new().open(trigger)
+    end
+  end
+
+  config.vm.define 'container-systemd' do |sysd|
     
     # Chef-Workstation
-    ws.vm.hostname = 'container-local-workstation'
-    ws.vm.network "private_network", ip: "192.168.2.4"
-    config.vm.network :forwarded_port,
+    sysd.vm.hostname = 'container-systemd'
+    sysd.vm.network "private_network", ip: "192.168.2.6"
+    sysd.vm.network :forwarded_port,
       guest: 22,
-      host: 2202,
+      host: 2201,
       id: "ssh",
       auto_correct: true
-    ws.vm.boot_timeout = 200
     #ws.ssh.username = "vagrant"
-    #ws.ssh.private_key_path = "../key.pem"
-    ws.ssh.port = 22
-    ws.ssh.guest_port = 22
+    #v.ssh.private_key_path = "../key.pem"
+    sysd.ssh.host = "localhost"
+    sysd.ssh.port = 2201
     
-    
-    ws.vm.provider "docker" do |d|
+    sysd.vm.provider "docker" do |d|
       # Parameter docs: https://docs.vagrantup.com/v2/docker/configuration.html
-      #d.privileged = true
+      d.privileged = true
       #d.build_dir = "."
-      # Volumes synced from host VM to container
-      d.volumes = ["/data:/data", "/vagrant/chef-repo:/home/vagrant/chef-repo"]
+      d.volumes = ["/data:/data:ro", "/sys/fs/cgroup:/sys/fs/cgroup:ro"]
       d.image = "yserz/docker-vagrant-centos-7-minivm"
-      # d.create_args = ["-e", "  SSH_PORT=23"]
-      # d.env = {
-      #   "SSH_PORT" => 23
-      # }
       d.vagrant_machine = "vm-dev-host"
       d.vagrant_vagrantfile = "../Vagrantfile"
       d.force_host_vm = true
@@ -56,7 +85,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     
     CHEF_JSON = JSON.parse(Pathname(__FILE__).dirname.join('.', 'chef.json').read)
     
-    ws.vm.provision "chef_client" do |chef|
+    sysd.vm.provision "chef_client" do |chef|
       # Solves the Chef SSL warning
       # http://stackoverflow.com/questions/22991561/chef-solo-ssl-warning-when-provisioning
       # Note: This function needs a SSL-Certificate installed in Chef-Server
@@ -75,11 +104,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       
       chef.run_list = CHEF_JSON.delete('run_list')
       chef.json = CHEF_JSON
-    end
-    
-    ws.vm.provision "shell" do |s|
-     p = File.expand_path("../../../", __FILE__)
-     s.path = p + "/data/scripts/chef/init_knife"
     end
   end
 end

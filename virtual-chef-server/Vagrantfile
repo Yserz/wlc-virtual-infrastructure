@@ -111,12 +111,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     host.vm.provision "docker"
     host.vm.provision "shell", path: "../data/scripts/docker/docker_load_images"
     host.vm.provision "docker" do |d|
-      d.build_image "/data/minivm", args: "-t yserz/docker-vagrant-centos-7-minivm"
+      d.build_image "/data/minivm_runit", args: "-t yserz/docker-vagrant-centos-7-minivm_runit"
       d.version = :latest # Default is :latest
     end
     host.vm.provision "shell", path: "../data/scripts/docker/docker_save_images"
-    
-    
+
+
     if Vagrant.has_plugin?('vagrant-triggers')
       # config.trigger.before :destroy, :stdout => true, :force => true do
       #   info "Updating Docker cache..."
