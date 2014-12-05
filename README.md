@@ -20,52 +20,62 @@ Usage
 * Install VirtualBox
 * Install Vagrant
 * Open Shell
-* Navigate to Folder
+* Navigate to Folder `virtual-chef-server`
 * Enter `vagrant up` and wait...
 	- This command will configure and boot the host VM
+* Enter `vagrant ssh` to ssh into the VM/Container
 
 
 
 Machines
 ========
 
-* `host` - The host VM containing all Docker Containers and the Open Source Chef-Server.
-* `local-workstation` - Workstation to work locally on Chef recipes and e.g. upload it to the local Chef-Server.
-* `remote-workstation` - Workstation to work on Chef-Recipes and e.g. upload it to the remote Chef-Server.
-* `jenkins` - 
+* `vm-chef-server` - The host VM containing the Open Source Chef-Server.
+	- `container-workstation-local` - Workstation to work locally on Chef recipes and e.g. upload it to the local Chef-Server.
+* `vm-dev-host` - The host VM containing all Docker Containers for the Development Environment.
+	- `container-jenkins` - The container for Jenkins CI.
+* `vm-wlc-test` - *Under Development* The host VM containing all Docker Containers for the We Love Coding Test Environment.
+	 - `container-wlc-glassfish` - *Under Development* The Container for the We Love Coding Test GlassFish.
+	 - `container-wlc-mysql` - *Under Development* The Container for the We Love Coding Test MySQL.
+* `vm-wlc-production` - *Under Development* The host VM containing all Docker Containers for the We Love Coding Production Environment.
+	 - `container-wlc-glassfish` - *Under Development* The Container for the We Love Coding Production GlassFish.
+	 - `container-wlc-mysql` - *Under Development* The Container for the We Love Coding Production MySQL.
 
 Network
 =======
 
-* Hostname: `host` 
-	- Type: `Virtual Machine`
-	- Private-IP: `192.168.7.1`
+* Virtual Machine: `vm-chef-server`
+	- Private-IP: `192.168.1.2`
 	- Services:
 		- Chef-Server
 	- Forworded Ports:
 	<table>
 		<tr><th>**Guest**</th>		<th>**Host**</th>		<th>**Description**</th></tr>
-		<tr><td>80</td>				<td>9090</td>			<td>Chef-Server UI HTTP</td></tr>
-		<tr><td>443</td>			<td>9191</td>			<td>Chef-Server UI HTTPS</td></tr>
+		<tr><td>9191</td>			<td>9191</td>			<td>Chef-Server UI HTTPS</td></tr>
 	</table>
 	- Containers:
-		* Hostname: `chef-workstation` 
-			- Type: `Docker Container`
-			- Private-IP: `192.168.7.2`
-			- Services:
-				- None
+		* Hostname: `container-workstation-local`
+			- Private-IP: `192.168.1.3`
 			- Ports:
 				- None
-		* Hostname: `jenkins` 
+
+* Virtual Machine: `vm-dev-host`
+	- Private-IP: `192.168.2.2`
+	- Services:
+		- Jenkins
+	- Forworded Ports:
+	<table>
+		<tr><th>**Guest**</th>		<th>**Host**</th>		<th>**Description**</th></tr>
+		<tr><td>8080</td>			<td>8080</td>			<td>Jenkins UI HTTP</td></tr>
+	</table>
+	- Containers:
+		* Hostname: `container-jenkins` 
 			- Type: `Docker Container`
-			- Private-IP: `TODO`
-			- Services:
-				- Jenkins CI
+			- Private-IP: `192.168.2.5`
 			- Ports:
 			<table>
 				<tr><th>**Port**</th>		<th>**Description**</th></tr>
 				<tr><td>8080</td>			<td>Jenkins UI HTTP</td></tr>
-				<tr><td>8181</td>			<td>Jenkins UI HTTPS</td></tr>
 			</table>
 
 Further Reading
