@@ -1,5 +1,5 @@
 [submodule "virtual-chef-server/chef-repo"]
-	path = virtual-chef-server/chef-repo
+	path = vm-chef-server/chef-repo
 	url = https://github.com/welovecoding/wlc-chef-repo.git
 [submodule "wlc-boxes"]
 	path = wlc-boxes

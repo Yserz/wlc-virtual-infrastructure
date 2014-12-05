@@ -20,7 +20,7 @@ Usage
 * Install VirtualBox
 * Install Vagrant
 * Open Shell
-* Navigate to Folder `virtual-chef-server`
+* Navigate to Folder `vm-chef-server`
 * Enter `vagrant up` and wait...
 	- This command will configure and boot the host VM
 * Enter `vagrant ssh` to ssh into the VM/Container

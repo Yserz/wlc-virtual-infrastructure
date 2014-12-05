@@ -38,5 +38,4 @@ data/logs/**
 !data/logs/.gitkeep
 !data/logs/chef-server/.gitkeep
 .rsync_ignore
-virtual-wlc-test/**
-basevm/**
+OLD/**
