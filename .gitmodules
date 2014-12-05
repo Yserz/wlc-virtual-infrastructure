@@ -1,4 +1,4 @@
-[submodule "virtual-chef-server/chef-repo"]
+[submodule "vm-chef-server/chef-repo"]
 	path = vm-chef-server/chef-repo
 	url = https://github.com/welovecoding/wlc-chef-repo.git
 [submodule "wlc-boxes"]

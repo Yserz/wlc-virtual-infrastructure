@@ -34,10 +34,10 @@ Machines
 	- `container-workstation-local` - Workstation to work locally on Chef recipes and e.g. upload it to the local Chef-Server.
 * `vm-dev-host` - The host VM containing all Docker Containers for the Development Environment.
 	- `container-jenkins` - The container for Jenkins CI.
-* `vm-wlc-test` - *Under Development* The host VM containing all Docker Containers for the We Love Coding Test Environment.
+* `vm-wlc-test` - The host VM containing all Docker Containers for the We Love Coding Test Environment.
 	 - `container-wlc-glassfish` - *Under Development* The Container for the We Love Coding Test GlassFish.
 	 - `container-wlc-mysql` - *Under Development* The Container for the We Love Coding Test MySQL.
-* `vm-wlc-production` - *Under Development* The host VM containing all Docker Containers for the We Love Coding Production Environment.
+* `vm-wlc-production` - The host VM containing all Docker Containers for the We Love Coding Production Environment.
 	 - `container-wlc-glassfish` - *Under Development* The Container for the We Love Coding Production GlassFish.
 	 - `container-wlc-mysql` - *Under Development* The Container for the We Love Coding Production MySQL.
 
@@ -59,7 +59,7 @@ Network
 			- Ports:
 				- None
 
-* Virtual Machine: `vm-dev-host`
+* Virtual Machine: `vm-development`
 	- Private-IP: `192.168.2.2`
 	- Services:
 		- Jenkins
@@ -76,6 +76,74 @@ Network
 			<table>
 				<tr><th>**Port**</th>		<th>**Description**</th></tr>
 				<tr><td>8080</td>			<td>Jenkins UI HTTP</td></tr>
+			</table>
+
+* Virtual Machine: `vm-wlc-production`
+	- Private-IP: `192.168.3.2`
+	- Services:
+		- GlassFish
+		- MySQL
+	- Forworded Ports:
+	<table>
+		<tr><th>**Guest**</th>		<th>**Host**</th>		<th>**Description**</th></tr>
+		<tr><td>8080</td>			<td>8080</td>			<td>GlassFish App HTTP</td></tr>
+		<tr><td>8181</td>			<td>8181</td>			<td>GlassFish App HTTPS</td></tr>
+		<tr><td>4848</td>			<td>4848</td>			<td>GlassFish Admin HTTP</td></tr>
+		<tr><td>4848</td>			<td>4848</td>			<td>GlassFish Admin HTTPS</td></tr>
+	</table>
+	- Containers:
+		* Hostname: `container-glassfish` 
+			- Type: `Docker Container`
+			- Private-IP: `192.168.3.3`
+			- Ports:
+			<table>
+				<tr><th>**Port**</th>		<th>**Description**</th></tr>
+				<td>8080</td>				<td>GlassFish App HTTP</td></tr>
+				<td>8181</td>				<td>GlassFish App HTTPS</td></tr>
+				<td>4848</td>				<td>GlassFish Admin HTTP</td></tr>
+				<td>4848</td>				<td>GlassFish Admin HTTPS</td></tr>
+			</table>
+		* Hostname: `container-mysql` 
+			- Type: `Docker Container`
+			- Private-IP: `192.168.3.4`
+			- Ports:
+			<table>
+				<tr><th>**Port**</th>		<th>**Description**</th></tr>
+				<td>3306</td>				<td>MySQL data</td></tr>
+			</table>
+
+* Virtual Machine: `vm-wlc-test`
+	- Private-IP: `192.168.4.2`
+	- Services:
+		- GlassFish
+		- MySQL
+	- Forworded Ports:
+	<table>
+		<tr><th>**Guest**</th>		<th>**Host**</th>		<th>**Description**</th></tr>
+		<tr><td>8080</td>			<td>8080</td>			<td>GlassFish App HTTP</td></tr>
+		<tr><td>8181</td>			<td>8181</td>			<td>GlassFish App HTTPS</td></tr>
+		<tr><td>4848</td>			<td>4848</td>			<td>GlassFish Admin HTTP</td></tr>
+		<tr><td>4848</td>			<td>4848</td>			<td>GlassFish Admin HTTPS</td></tr>
+	</table>
+	- Containers:
+		* Hostname: `container-glassfish` 
+			- Type: `Docker Container`
+			- Private-IP: `192.168.4.3`
+			- Ports:
+			<table>
+				<tr><th>**Port**</th>		<th>**Description**</th></tr>
+				<td>8080</td>				<td>GlassFish App HTTP</td></tr>
+				<td>8181</td>				<td>GlassFish App HTTPS</td></tr>
+				<td>4848</td>				<td>GlassFish Admin HTTP</td></tr>
+				<td>4848</td>				<td>GlassFish Admin HTTPS</td></tr>
+			</table>
+		* Hostname: `container-mysql` 
+			- Type: `Docker Container`
+			- Private-IP: `192.168.4.4`
+			- Ports:
+			<table>
+				<tr><th>**Port**</th>		<th>**Description**</th></tr>
+				<td>3306</td>				<td>MySQL data</td></tr>
 			</table>
 
 Further Reading

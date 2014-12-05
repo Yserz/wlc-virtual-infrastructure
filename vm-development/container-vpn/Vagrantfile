@@ -65,7 +65,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       d.expose = [1194]
       d.ports = ["1194:1194"]
       d.image = "yserz/docker-vagrant-centos-7-minivm"
-      d.vagrant_machine = "vm-dev-host"
+      d.vagrant_machine = "vm-development"
       d.vagrant_vagrantfile = "../Vagrantfile"
       d.force_host_vm = true
       d.has_ssh = true

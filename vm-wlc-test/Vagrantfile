@@ -76,15 +76,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
   
-  config.vm.network :private_network, ip: "192.168.2.2"
-  # Jenkins-Ports
-  config.vm.network :forwarded_port, guest: 8080, host: 8080
+  config.vm.network :private_network, ip: "192.168.4.2"
   
   config.vm.synced_folder "../data/", "/data"
   #config.vm.synced_folder "../data/logs/", "/var/log"
   
   config.vm.provider "virtualbox" do |vb|
-    vb.name = "vm-development"
+    vb.name = "vm-dev-host"
     vb.customize ["modifyvm", :id, "--cpuexecutioncap", "80"]
     vb.customize ["modifyvm", :id, "--cpus", using_cpus]
     vb.customize ["modifyvm", :id, "--memory", using_memory]
@@ -99,8 +97,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
   
   # Definition of the Proxy-Instance running docker containers
-  config.vm.define "vm-development" do |host|
-    host.vm.hostname = "vm-development"
+  config.vm.define "vm-dev-host" do |host|
+    host.vm.hostname = "vm-dev-host"
     #host.vm.post_up_message = 'Welcome to the We Love Coding: VM-DEV-HOST!'
     host.vm.box = "chef/centos-7.0"
     #host.ssh.username = "vagrant"

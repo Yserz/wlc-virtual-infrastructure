@@ -77,7 +77,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       #d.build_dir = "."
       d.volumes = ["/data:/data:ro", "/sys/fs/cgroup:/sys/fs/cgroup:ro"]
       d.image = "yserz/docker-vagrant-centos-7-minivm"
-      d.vagrant_machine = "vm-dev-host"
+      d.vagrant_machine = "vm-development"
       d.vagrant_vagrantfile = "../Vagrantfile"
       d.force_host_vm = true
       d.has_ssh = true
