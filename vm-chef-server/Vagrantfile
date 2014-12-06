@@ -102,10 +102,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "vm-chef-server" do |host|
     host.vm.hostname = "vm-chef-server"
     #host.vm.post_up_message = 'Welcome to the We Love Coding: Chef-Server!'
-    #host.vm.box_url = "file://../wlc-boxes/builds/virtualbox/wlc_0.1.0_centos-6.6_chef-11.16.4.box"
-    #host.vm.box_url = "https://googledrive.com/host/0B1Rrb7yxWPvLOVMwVTMzd1pnMW8/wlc_0.1.0_centos-6.6_x86_64_chef-11.16.4.box"
     host.vm.box = "wlc/centos-6.6"
-    #host.vm.box = "chef/centos-6.6"
     #host.ssh.username = "vagrant"
     
     host.vm.provision "docker"

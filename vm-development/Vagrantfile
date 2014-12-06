@@ -102,7 +102,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "vm-development" do |host|
     host.vm.hostname = "vm-development"
     #host.vm.post_up_message = 'Welcome to the We Love Coding: VM-DEV-HOST!'
-    host.vm.box = "chef/centos-7.0"
+    host.vm.box = "wlc/centos-7.0"
     #host.ssh.username = "vagrant"
     
     # fix "System is booting up. See pam_nologin(8)"
