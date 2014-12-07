@@ -33,9 +33,6 @@ Desktop.ini
 $RECYCLE.BIN/
 
 data/credentials/**
-data/logs/**
 # Keep log directories
-!data/logs/.gitkeep
-!data/logs/chef-server/.gitkeep
 .rsync_ignore
 OLD/**
