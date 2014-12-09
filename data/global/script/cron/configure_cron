@@ -1,0 +1,20 @@
+#!/bin/bash
+
+cd;
+# install unison
+curl -o unison.rpm http://apt.sw.be/redhat/el6/en/x86_64/rpmforge/RPMS/unison-2.40.63-1.el6.rf.x86_64.rpm;
+rpm -Uvh unison.rpm;
+rm -f unison.rpm;
+mkdir -p /root/.unison
+cp -f /data/unison/default.prf /root/.unison/default.prf
+cp -f /data/unison/log.prf /root/.unison/log.prf
+cp -f /data/unison/unison.prf /root/.unison/unison.prf
+chown -R root:root /root/.unison
+
+
+#configure cron.d
+mkdir -p /etc/cron.minutely
+cp -f /globaldata/script/cron/0unison.cron /etc/cron.minutely
+cp -f /globaldata/script/cron/0minutely /etc/cron.d/0minutely
+
+grep "* * * * * root run-parts /etc/cron.minutely" /etc/crontab || echo "* * * * * root run-parts /etc/cron.minutely" >> /etc/crontab

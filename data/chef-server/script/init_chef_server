@@ -1,0 +1,111 @@
+#!/bin/sh
+
+# scope guest VM
+
+VALIDATOR_PEM_PATH=/etc/chef-server/chef-validator.pem
+ADMIN_PEM_PATH=/etc/chef-server/admin.pem
+TEMP_PEM_PATH=/etc/chef-server/temp.pem
+#KNIFE_PATH=/opt/chef-server/embedded/bin/knife
+
+
+copyKnifeRB(){
+	local new_knife_rb_path=$1
+	mkdir -p ~/.chef/ && /bin/cp -rf $new_knife_rb_path ~/.chef/knife.rb;
+}
+
+genPassword(){
+	echo `date +%s | sha256sum | base64 | head -c 32 | tr '[:upper:]' '[:lower:]'`
+}
+
+
+isUserPresent() {
+	local user=$1
+#	echo "INFO: Checking user $user is already present"
+	local response=$(sudo knife user show $user 2> /dev/null)
+#	echo "INFO: response was: \n$response"
+	if [[ $response == "ERROR: The object you are looking for could not be found"* ]] || [[ $response == "Response: user '$user' not found"* ]] ; then
+#		echo "INFO: User $user IS NOT present"
+		return 1
+	else
+#		echo "INFO: User $user IS present"
+		return 0
+	fi
+}
+
+createUser(){
+	local user=$1
+	local user_pw=$2
+	local pem_path=$3
+	if isUserPresent $user ; then 
+		echo "INFO: User $user already present. Recreating..."
+		deleteUser $user
+		echo "INFO: Creating user $user"
+		sudo knife user create $user \
+		  --admin \
+		  --disable-editing \
+		  --password $user_pw \
+		  --file $3;
+	else
+		echo "INFO: Creating user $user"
+		sudo knife user create $user \
+		  --admin \
+		  --disable-editing \
+		  --password $user_pw \
+		  --file $3;
+	fi
+	echo "INFO: Response: $response"
+}
+
+deleteUser(){
+	local user=$1
+	echo "INFO: Deleting user $user"
+	local response=$(sudo knife user delete $user --yes)
+	echo "INFO: Response: $response"
+}
+
+fixChef5211(){
+	# Fix https://tickets.opscode.com/browse/CHEF-5211 + https://github.com/opscode/chef/pull/1374/files
+	# add Line 'o.load_plugins' in '/opt/chef-server/embedded/lib/ruby/gems/1.9.1/gems/chef-11.12.2/lib/chef/knife/configure.rb'
+	sudo sed -i '/o = Ohai::System.new/a        o.load_plugins' /opt/chef-server/embedded/lib/ruby/gems/1.9.1/gems/chef-11.12.2/lib/chef/knife/configure.rb
+}
+
+# TODO login as vagrant user
+sudo su vagrant
+
+
+echo "INFO: ######################   APPLYING CHEF-SERVER PATCH          ###################### "
+fixChef5211
+
+echo "INFO: ######################   COPYING CHEF ADMIN CONFIG           ###################### "
+copyKnifeRB /data/config/admin_knife.rb
+
+echo "INFO: ######################   CREATING CHEF TEMP USER             ###################### "
+PW=$(genPassword);
+echo "INFO: Generated password is '$PW'"
+createUser temp $PW $TEMP_PEM_PATH
+PW=0;
+
+echo "INFO: ######################   COPYING CHEF TEMP CONFIG            ###################### "
+copyKnifeRB /data/config/temp_knife.rb
+
+echo "INFO: ######################   DELETING CHEF ADMIN USER            ###################### "
+deleteUser admin
+
+echo "INFO: ######################   CREATING CHEF ADMIN USER            ###################### "
+genPassword > /data/credentials/chef_admin_pw
+PW=$(cat /data/credentials/chef_admin_pw);
+echo "INFO: Generated password is '$PW'"
+createUser admin $PW $ADMIN_PEM_PATH
+PW=0;
+
+echo "INFO: ######################   COPYING CHEF ADMIN CONFIG           ###################### "
+copyKnifeRB /data/config/admin_knife.rb
+
+echo "INFO: ######################   DELETING CHEF TEMP USER             ###################### "
+deleteUser temp
+
+# TODO DELETE temp.key if it isn't already by chef
+
+echo "INFO: ######################   COPYING CHEF KEYS FOR CLIENTS       ###################### "
+cp $VALIDATOR_PEM_PATH /data/chef-client/credentials/chef-validator.pem;
+sudo cp $ADMIN_PEM_PATH /data/credentials/admin.pem;

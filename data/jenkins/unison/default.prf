@@ -1,0 +1,24 @@
+# Unison preferences file
+perms = 0
+root = /data/config/
+root = /var/lib/jenkins/
+
+# Ignore these files
+ignore = Name *.tmp
+ignore = Name .*
+
+# This flag causes the user interface to skip
+# asking for confirmations on non-conflicting changes.
+auto=true
+
+# When this is set to true, the user interface will ask no
+# questions at all. Non-conflicting changes will be propagated;
+# conflicts will be skipped.
+batch=true
+
+# Assign group and user rights
+group=true
+owner=true
+
+# prefer to sync newer files
+prefer=newer

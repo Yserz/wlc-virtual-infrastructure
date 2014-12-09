@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Action!
+i="$(date -d now +%S)"
+# do until it's hh:mm:55
+while [ $i -lt 50 ]
+do
+  sudo unison default.prf
+  sudo unison log.prf
+  sudo unison unison.prf
+  i="$(date -d now +%S)"
+
+  sleep 10 || exit 2 
+done
+
+exit 0
