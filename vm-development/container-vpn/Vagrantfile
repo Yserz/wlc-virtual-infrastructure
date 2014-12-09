@@ -50,8 +50,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vpn.vm.network :forwarded_port,
       guest: 22,
       host: 2203,
-      id: "ssh",
-      auto_correct: true
+      id: "ssh"
     vpn.vm.boot_timeout = 200
     #vpn.ssh.username = "vagrant"
     #vpn.ssh.private_key_path = "../key.pem"
@@ -61,10 +60,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     
     vpn.vm.provider "docker" do |d|
       d.privileged = true
-      d.volumes = ["/data:/data", "/sys/fs/cgroup:/sys/fs/cgroup:ro"]
+      d.volumes = [
+        "/data:/data", 
+        "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+      ]
       d.expose = [1194]
       d.ports = ["1194:1194"]
-      d.image = "yserz/docker-vagrant-centos-7-minivm"
+      d.image = "yserz/docker-vagrant-centos-7-minivm_chef"
       d.vagrant_machine = "vm-development"
       d.vagrant_vagrantfile = "../Vagrantfile"
       d.force_host_vm = true

@@ -24,8 +24,8 @@ end
 
 ######################################################
 #                                                    #
-#                VM-DEVELOPMENT-HOST                 #
-#                *******************                 #
+#                     VM-WLC-TEST                    #
+#                     ***********                    #
 #                                                    #
 ######################################################
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -39,7 +39,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
   ######### OMNIBUS
   # config.omnibus.install_url = 'http://acme.com/install.sh'
-  config.omnibus.chef_version = "11.16.4" # :latest
+  config.omnibus.chef_version = "12.0.0" # :latest
   
   ######### VBGUEST
   #config.vbguest.auto_update = false
@@ -77,9 +77,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
   
   config.vm.network :private_network, ip: "192.168.4.2"
+  # Jenkins-Ports
+  config.vm.network :forwarded_port, guest: 8080, host: 8080
   
-  config.vm.synced_folder "../data/", "/data"
-  #config.vm.synced_folder "../data/logs/", "/var/log"
+  config.vm.synced_folder "../data/global/", "/globaldata"
+  config.vm.synced_folder "../data/jenkins/", "/data/jenkins"
   
   config.vm.provider "virtualbox" do |vb|
     vb.name = "vm-wlc-test"
@@ -109,12 +111,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # TODO may turn pam_nologin on again
     
     host.vm.provision "docker"
-    host.vm.provision "shell", path: "../data/scripts/docker/docker_load_images"
+    host.vm.provision "shell", path: "../data/global/script/docker/docker_load_images"
     host.vm.provision "docker" do |d|
-      d.build_image "/data/minivm_sysd", args: "-t yserz/docker-vagrant-centos-7-minivm"
+      d.build_image "/globaldata/container/minivm_sysd", args: "-t yserz/docker-vagrant-centos-7-minivm"
       d.version = :latest # Default is :latest
     end
-    host.vm.provision "shell", path: "../data/scripts/docker/docker_save_images"
+    host.vm.provision "docker" do |d|
+      d.build_image "/globaldata/container/minivm_sysd_chef", args: "-t yserz/docker-vagrant-centos-7-minivm_chef"
+      d.version = :latest # Default is :latest
+    end
+    host.vm.provision "shell", path: "../data/global/script/docker/docker_save_images"
     
     
     if Vagrant.has_plugin?('vagrant-triggers')
@@ -136,9 +142,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       
       #chef.encrypted_data_bag_secret_key_path = "../data_bag_key.pem"
       chef.chef_server_url = "https://192.168.1.2:9191/"
-      chef.validation_key_path = "../data/credentials/chef/chef-validator.pem"
+      chef.validation_key_path = "../data/chef-client/credentials/chef-validator.pem"
       #chef.client_key_path = "/vagrant/local-workstation.pem"
-      #chef.log_level = :info
       
       CHEF_JSON['run_list'].each do |recipe|
         puts recipe

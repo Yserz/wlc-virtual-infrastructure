@@ -1,3 +1,0 @@
-#!/bin/sh
-cd /var/log/service/sshd
-/sbin/chpst -u logger /sbin/svlogd -tt /var/log/service/sshd

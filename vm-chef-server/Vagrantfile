@@ -79,8 +79,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Chef-Server-Ports
   config.vm.network :forwarded_port, guest: 9191, host: 9191
   
-  config.vm.synced_folder "../data/", "/data"
-  config.vm.synced_folder "../data/logs/chef-server/", "/var/log/chef-server"
+  config.vm.synced_folder "../data/global", "/globaldata"
+  config.vm.synced_folder "../data/chef-server/", "/data"
+  config.vm.synced_folder "../data/chef-client/", "/data/chef-client"
+  config.vm.synced_folder "../data/chef-server/log/", "/var/log/chef-server"
   
   config.vm.provider "virtualbox" do |vb|
     vb.name = "vm-chef-server"
@@ -106,12 +108,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     #host.ssh.username = "vagrant"
     
     host.vm.provision "docker"
-    host.vm.provision "shell", path: "../data/scripts/docker/docker_load_images"
+    host.vm.provision "shell", path: "../data/global/script/docker/docker_load_images"
     host.vm.provision "docker" do |d|
-      d.build_image "/data/minivm_runit", args: "-t yserz/docker-vagrant-centos-7-minivm_runit"
+      d.build_image "/globaldata/container/minivm_runit", args: "-t yserz/docker-vagrant-centos-7-minivm_runit"
       d.version = :latest # Default is :latest
     end
-    host.vm.provision "shell", path: "../data/scripts/docker/docker_save_images"
+    host.vm.provision "shell", path: "../data/global/script/docker/docker_save_images"
 
 
     if Vagrant.has_plugin?('vagrant-triggers')
@@ -144,7 +146,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       chef.json = CHEF_JSON
     end
     
-    host.vm.provision "shell", path: "../data/scripts/chef/init_chef_server"
+    host.vm.provision "shell", path: "../data/chef-server/script/init_chef_server"
     # TODO make sure chef-repo is up to date before uploading it (install git, git pull...)
     # TODO login and do as vagrant user
     # sudo su vagrant && cd /vagrant/chef-repo/ && git pull && sudo knife cookbook upload --all

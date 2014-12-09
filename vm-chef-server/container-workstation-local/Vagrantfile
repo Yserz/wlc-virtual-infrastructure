@@ -66,7 +66,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       #d.privileged = true
       #d.build_dir = "."
       # Volumes synced from host VM to container
-      d.volumes = ["/data:/data", "/vagrant/chef-repo:/home/vagrant/chef-repo"]
+      d.volumes = [
+        "/data/chef-client:/data", 
+        "/vagrant/chef-repo:/home/vagrant/chef-repo"
+      ]
       d.image = "yserz/docker-vagrant-centos-7-minivm_runit"
       # d.create_args = ["-e", "  SSH_PORT=23"]
       # d.env = {
@@ -88,7 +91,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       
       #chef.encrypted_data_bag_secret_key_path = "../data_bag_key.pem"
       chef.chef_server_url = "https://192.168.1.2:9191/"
-      chef.validation_key_path = "../../data/credentials/chef/chef-validator.pem"
+      chef.validation_key_path = "../../data/chef-client/credentials/chef-validator.pem"
       #chef.client_key_path = "/vagrant/local-workstation.pem"
       #chef.log_level = :info
       
@@ -103,7 +106,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     
     ws.vm.provision "shell" do |s|
      p = File.expand_path("../../../", __FILE__)
-     s.path = p + "/data/scripts/chef/init_knife"
+     s.path = p + "/data/chef-client/script/init_knife"
     end
   end
 end

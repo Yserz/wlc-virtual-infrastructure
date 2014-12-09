@@ -1,7 +1,7 @@
 {
 	"java": {
 		"install_flavor": "oracle", 
-		"jdk_version": "7", 
+		"jdk_version": "8", 
 		"oracle": { 
 			"accept_oracle_download_terms": true
 		}
@@ -9,7 +9,6 @@
 	"jenkins": {
 		"master": {
 			"install_method": "package",
-			"version": "1.580-1.1",
 			"jvm_options": null,
 			"jenkins_args": null,
 			"user": "jenkins",
@@ -19,7 +18,7 @@
 			"listen_address": "0.0.0.0",
 			"port": 8080,
 			"home": "/var/lib/jenkins",
-			"log_directory": "/var/log/jenkins"		
+			"log_directory": "/var/log/jenkins"
 		}
 	},
 	"run_list": [
