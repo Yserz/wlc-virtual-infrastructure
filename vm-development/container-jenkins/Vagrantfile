@@ -66,8 +66,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     jk.vm.network "private_network", ip: "192.168.2.5"
     jk.vm.network :forwarded_port,
       guest: 22,
-      host: 2202,
-      id: "ssh"
+      host: 2202
     #ws.ssh.username = "vagrant"
     #v.ssh.private_key_path = "../key.pem"
     jk.ssh.host = "localhost"

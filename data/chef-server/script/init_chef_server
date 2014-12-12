@@ -63,18 +63,8 @@ deleteUser(){
 	echo "INFO: Response: $response"
 }
 
-fixChef5211(){
-	# Fix https://tickets.opscode.com/browse/CHEF-5211 + https://github.com/opscode/chef/pull/1374/files
-	# add Line 'o.load_plugins' in '/opt/chef-server/embedded/lib/ruby/gems/1.9.1/gems/chef-11.12.2/lib/chef/knife/configure.rb'
-	sudo sed -i '/o = Ohai::System.new/a        o.load_plugins' /opt/chef-server/embedded/lib/ruby/gems/1.9.1/gems/chef-11.12.2/lib/chef/knife/configure.rb
-}
-
-# TODO login as vagrant user
 sudo su vagrant
 
-
-echo "INFO: ######################   APPLYING CHEF-SERVER PATCH          ###################### "
-fixChef5211
 
 echo "INFO: ######################   COPYING CHEF ADMIN CONFIG           ###################### "
 copyKnifeRB /data/config/admin_knife.rb

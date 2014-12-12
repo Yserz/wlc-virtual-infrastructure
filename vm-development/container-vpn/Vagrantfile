@@ -7,7 +7,6 @@ require_relative '../../xt/butcher_monkeypatch.rb'
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'docker'
 ENV['VAGRANT_LOG'] = 'info'
 ENV['CHEF_LOG'] = 'info'
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
 ######################################################
@@ -27,7 +26,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
   ######### OMNIBUS
   # config.omnibus.install_url = 'http://acme.com/install.sh'
-  config.omnibus.chef_version = "11.16.4" # :latest
+  config.omnibus.chef_version = "12.0.0" # :latest
   
   ######### VBGUEST
   #config.vbguest.auto_update = false
@@ -49,8 +48,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vpn.vm.network "private_network", ip: "192.168.2.3"
     vpn.vm.network :forwarded_port,
       guest: 22,
-      host: 2203,
-      id: "ssh"
+      host: 2203
     vpn.vm.boot_timeout = 200
     #vpn.ssh.username = "vagrant"
     #vpn.ssh.private_key_path = "../key.pem"

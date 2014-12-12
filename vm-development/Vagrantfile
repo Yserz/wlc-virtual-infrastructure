@@ -105,11 +105,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     host.vm.box = "wlc/centos-7.0"
     #host.ssh.username = "vagrant"
     
-    # fix "System is booting up. See pam_nologin(8)"
-    host.vm.provision "shell", inline: "sudo sed -i -r 's/^(.*pam_nologin.so)/#\1/' /etc/pam.d/sshd"
-    host.vm.provision "shell", inline: "sudo rm -rf /run/nologin"
-    # TODO may turn pam_nologin on again
-    
     host.vm.provision "docker"
     host.vm.provision "shell", path: "../data/global/script/docker/docker_load_images"
     host.vm.provision "docker" do |d|

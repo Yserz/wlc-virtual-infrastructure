@@ -145,6 +145,13 @@ Network
 				<tr><th>**Port**</th>		<th>**Description**</th></tr>
 				<td>3306</td>				<td>MySQL data</td></tr>
 			</table>
+			
+Troubleshotting
+===============
+
+git status says `detached HEAD` - use `git checkout master`
+updating submodules - use `git submodule update --recursive`
+git yields `No submodule mapping found in .gitmodule for a path REPO_NAME` - find repo with `git ls-files --stage | grep 160000` and delete with `git rm --cached REPO_NAME`
 
 Further Reading
 ===============

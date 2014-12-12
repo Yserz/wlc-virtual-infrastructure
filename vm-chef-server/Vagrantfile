@@ -39,7 +39,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
   ######### OMNIBUS
   # config.omnibus.install_url = 'http://acme.com/install.sh'
-  config.omnibus.chef_version = "11.16.4" # :latest
+  config.omnibus.chef_version = "12.0.0" # :latest
   
   ######### VBGUEST
   #config.vbguest.auto_update = false

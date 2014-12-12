@@ -8,7 +8,6 @@ require_relative '../xt/browser.rb'
 
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 ENV['VAGRANT_LOG'] = 'debug'
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
 
@@ -77,11 +76,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
   
   config.vm.network :private_network, ip: "192.168.4.2"
-  # Jenkins-Ports
-  config.vm.network :forwarded_port, guest: 8080, host: 8080
   
   config.vm.synced_folder "../data/global/", "/globaldata"
-  config.vm.synced_folder "../data/jenkins/", "/data/jenkins"
   
   config.vm.provider "virtualbox" do |vb|
     vb.name = "vm-wlc-test"
@@ -104,11 +100,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     #host.vm.post_up_message = 'Welcome to the We Love Coding: VM-DEV-HOST!'
     host.vm.box = "wlc/centos-7.0"
     #host.ssh.username = "vagrant"
-    
-    # fix "System is booting up. See pam_nologin(8)"
-    host.vm.provision "shell", inline: "sudo sed -i -r 's/^(.*pam_nologin.so)/#\1/' /etc/pam.d/sshd"
-    host.vm.provision "shell", inline: "sudo rm -rf /run/nologin"
-    # TODO may turn pam_nologin on again
     
     host.vm.provision "docker"
     host.vm.provision "shell", path: "../data/global/script/docker/docker_load_images"
