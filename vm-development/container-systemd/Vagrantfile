@@ -18,7 +18,7 @@ VAGRANTFILE_API_VERSION = "2"
 ######################################################
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Checks prequisites and plugins
-  pre = Preamble.new(config, ">= 1.6.5")
+  pre = Preamble.new(config, ">= 1.7.1")
   
   ######### CACHIER
   # Configure cached packages to be shared between instances of the same base box.
@@ -27,7 +27,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
   ######### OMNIBUS
   # config.omnibus.install_url = 'http://acme.com/install.sh'
-  config.omnibus.chef_version = "12.0.0" # :latest
+  config.omnibus.chef_version = "12.0.1" # :latest
   
   ######### VBGUEST
   #config.vbguest.auto_update = false
@@ -58,22 +58,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define 'container-systemd' do |sysd|
     
-    # Chef-Workstation
     sysd.vm.hostname = 'container-systemd'
-    sysd.vm.network "private_network", ip: "192.168.2.6"
-    sysd.vm.network :forwarded_port,
-      guest: 22,
-      host: 2201
-    #ws.ssh.username = "vagrant"
-    #v.ssh.private_key_path = "../key.pem"
-    sysd.ssh.host = "localhost"
-    sysd.ssh.port = 2201
+    sysd.vm.network :forwarded_port, guest: 22, host: 22002, auto_correct: true, id: "ssh"
     
     sysd.vm.provider "docker" do |d|
       # Parameter docs: https://docs.vagrantup.com/v2/docker/configuration.html
       d.privileged = true
       d.volumes = [
-        "/data:/data:ro", 
+        "/globaldata/:/globaldata",
         "/sys/fs/cgroup:/sys/fs/cgroup:ro"
       ]
       d.image = "yserz/docker-vagrant-centos-7-minivm_chef"
@@ -93,7 +85,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       
       #chef.encrypted_data_bag_secret_key_path = "../data_bag_key.pem"
       chef.chef_server_url = "https://192.168.1.2:9191/"
-      chef.validation_key_path = "../../data/credentials/chef/chef-validator.pem"
+      chef.validation_key_path = "../../data/chef-client/credentials/chef-validator.pem"
       #chef.client_key_path = "/vagrant/local-workstation.pem"
       
       CHEF_JSON['run_list'].each do |recipe|

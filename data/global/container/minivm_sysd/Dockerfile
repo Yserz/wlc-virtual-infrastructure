@@ -35,12 +35,12 @@ RUN ssh-keygen -A
 # Creating Vagrant SSH Account
 ADD key.pub /tmp/key.pub
 RUN groupadd \ 
-	--gid 500 \ 
+	--gid 1000 \ 
 	--system \ 
 	vagrant; \ 
 	useradd \ 
-	--uid 500 \ 
-	--gid 500 \ 
+	--uid 1000 \ 
+	--gid 1000 \ 
 	--home /home/vagrant \ 
 	--shell /bin/bash vagrant; \ 
 #	passwd -u vagrant; \

@@ -30,7 +30,7 @@ end
 ######################################################
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Checks prequisites and plugins
-  pre = Preamble.new(config, ">= 1.6.5")
+  pre = Preamble.new(config, ">= 1.7.1")
   
   ######### CACHIER
   # Configure cached packages to be shared between instances of the same base box.

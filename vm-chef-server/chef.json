@@ -1,11 +1,4 @@
 {
-	"java": {
-		"install_flavor": "oracle", 
-		"jdk_version": "7", 
-		"oracle": { 
-			"accept_oracle_download_terms": true
-		}
-	},
 	"chef-server": {
 		"configuration": {
 			"nginx": {
@@ -21,7 +14,6 @@
 	"run_list": [
 		"recipe[tar]",
 		"recipe[git]",
-		"recipe[java::default]",
 		"recipe[chef-server::default]"
 	]
 }

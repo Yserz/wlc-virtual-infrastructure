@@ -30,7 +30,7 @@ end
 ######################################################
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Checks prequisites and plugins
-  pre = Preamble.new(config, ">= 1.6.5")
+  pre = Preamble.new(config, ">= 1.7.1")
   
   ######### CACHIER
   # Configure cached packages to be shared between instances of the same base box.
@@ -93,7 +93,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.customize ["guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--enable-timesync"]
     # Fix symlinks -> Vagrant-713: https://github.com/mitchellh/vagrant/issues/713
     vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
-    vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate//data", "1"]
+    vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate//globaldata", "1"]
     vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate//tmp/vagrant-cache", "1"]
   end
   

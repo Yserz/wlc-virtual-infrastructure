@@ -30,7 +30,7 @@ end
 ######################################################
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Checks prequisites and plugins
-  pre = Preamble.new(config, ">= 1.6.5")
+  pre = Preamble.new(config, ">= 1.7.1")
   
   ######### CACHIER
   # Configure cached packages to be shared between instances of the same base box.
@@ -80,7 +80,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network :forwarded_port, guest: 9191, host: 9191
   
   config.vm.synced_folder "../data/global", "/globaldata"
-  config.vm.synced_folder "../data/chef-server/", "/data"
+  config.vm.synced_folder "../data/chef-server/", "/data/chef-server"
   config.vm.synced_folder "../data/chef-client/", "/data/chef-client"
   config.vm.synced_folder "../data/chef-server/log/", "/var/log/chef-server"
   
