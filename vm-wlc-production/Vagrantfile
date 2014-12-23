@@ -4,6 +4,7 @@
 require 'json'
 require_relative '../xt/preamble.rb'
 require_relative '../xt/hardware.rb'
+require_relative '../xt/cachier_monkeypatch.rb'
 require_relative '../xt/browser.rb'
 
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
@@ -97,13 +98,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate//tmp/vagrant-cache", "1"]
   end
   
-  
-  # Definition of the Proxy-Instance running docker containers
   config.vm.define "vm-wlc-production" do |host|
     host.vm.hostname = "vm-wlc-production"
-    #host.vm.post_up_message = 'Welcome to the We Love Coding: VM-DEV-HOST!'
     host.vm.box = "wlc/centos-7.0"
-    #host.ssh.username = "vagrant"
     
     host.vm.provision "docker"
     host.vm.provision "shell", path: "../data/global/script/docker/docker_load_images"
@@ -117,36 +114,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
     host.vm.provision "shell", path: "../data/global/script/docker/docker_save_images"
     
-    
-    if Vagrant.has_plugin?('vagrant-triggers')
-      # config.trigger.before :destroy, :stdout => true, :force => true do
-      #   info "Updating Docker cache..."
-      #   run_remote "sudo chmod 755 /vagrant/docker_save_images && /vagrant/docker_save_images"
-      # end
-    end
-    
-    
-    
-    CHEF_JSON = JSON.parse(Pathname(__FILE__).dirname.join('.', 'chef.json').read)
-    
     host.vm.provision "chef_client" do |chef|
-      # Solves the Chef SSL warning
-      # http://stackoverflow.com/questions/22991561/chef-solo-ssl-warning-when-provisioning
-      # Note: This function needs a SSL-Certificate installed in Chef-Server
-      #chef.custom_config_path = "vagrant_chef_config"
+      chef.custom_config_path = "vagrant_chef_config"
       
       #chef.encrypted_data_bag_secret_key_path = "../data_bag_key.pem"
       chef.chef_server_url = "https://192.168.1.2:9191/"
       chef.validation_key_path = "../data/chef-client/credentials/chef-validator.pem"
-      #chef.client_key_path = "/vagrant/local-workstation.pem"
-      
-      CHEF_JSON['run_list'].each do |recipe|
-        puts recipe
-        chef.add_recipe(recipe)
-      end if CHEF_JSON['run_list']
-      
-      chef.run_list = CHEF_JSON.delete('run_list')
-      chef.json = CHEF_JSON
+      chef.environment = "wlc_production"
+      chef.add_role "host_environment"
     end
   end
 end

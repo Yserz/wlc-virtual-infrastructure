@@ -3,12 +3,14 @@
 
 require_relative '../../xt/preamble.rb'
 require_relative '../../xt/butcher_monkeypatch.rb'
+require_relative '../../xt/cachier_monkeypatch.rb'
 require_relative '../../xt/browser.rb'
 
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'docker'
 ENV['VAGRANT_LOG'] = 'info'
 ENV['CHEF_LOG'] = 'info'
 VAGRANTFILE_API_VERSION = "2"
+
 
 ######################################################
 #                                                    #
@@ -24,10 +26,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Configure cached packages to be shared between instances of the same base box.
   # More info on http://fgrehm.viewdocs.io/vagrant-cachier/usage
   # Disable cache because of failing JDK installation
-  #config.cache.auto_detect = true
+  config.cache.auto_detect = false
   config.cache.scope = :box
-  #config.cache.enable :yum
-  #config.cache.enable :chef
+  config.cache.enable :yum
+  config.cache.enable :chef
   
   ######### OMNIBUS
   # config.omnibus.install_url = 'http://acme.com/install.sh'
@@ -61,8 +63,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   config.vm.define 'container-jenkins' do |jk|
-    
-    # Chef-Workstation
     jk.vm.hostname = 'container-jenkins'
     jk.vm.network :forwarded_port, guest: 22, host: 22001, id: "ssh", auto_correct: true
     jk.vm.network :forwarded_port, guest: 8080, host: 8080, id: "jenkins"
@@ -82,30 +82,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       d.has_ssh = true
     end
     
-    jk.vm.provision "shell", inline: "groupadd --force --system jenkins && useradd -g jenkins -G vagrant --home /var/lib/jenkins --shell /bin/false jenkins"
+    jk.vm.provision "shell", inline: "groupadd --force --system jenkins && (id -u jenkins >/dev/null || useradd -g jenkins -G vagrant --home /var/lib/jenkins --shell /bin/false jenkins)"
     jk.vm.provision "shell", path: "../../data/global/script/cron/configure_cron"
     
-    CHEF_JSON = JSON.parse(Pathname(__FILE__).dirname.join('.', 'chef.json').read)
-    
     jk.vm.provision "chef_client" do |chef|
-      # Solves the Chef SSL warning
-      # http://stackoverflow.com/questions/22991561/chef-solo-ssl-warning-when-provisioning
-      # Note: This function needs a SSL-Certificate installed in Chef-Server
-      #chef.custom_config_path = "vagrant_chef_config"
-      
+      chef.custom_config_path = "vagrant_chef_config"
       #chef.encrypted_data_bag_secret_key_path = "../data_bag_key.pem"
       chef.chef_server_url = "https://192.168.1.2:9191/"
       chef.validation_key_path = "../../data/chef-client/credentials/chef-validator.pem"
-      #chef.client_key_path = "/vagrant/local-workstation.pem"
-      #chef.log_level = :info
-      
-      CHEF_JSON['run_list'].each do |recipe|
-        puts recipe
-        chef.add_recipe(recipe)
-      end if CHEF_JSON['run_list']
-      
-      chef.run_list = CHEF_JSON.delete('run_list')
-      chef.json = CHEF_JSON
+      chef.environment = "development"
+      chef.add_role "jenkins_server"
     end
   end
 end

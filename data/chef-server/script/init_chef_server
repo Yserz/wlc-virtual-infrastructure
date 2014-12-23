@@ -63,9 +63,6 @@ deleteUser(){
 	echo "INFO: Response: $response"
 }
 
-sudo su vagrant
-
-
 echo "INFO: ######################   COPYING CHEF ADMIN CONFIG           ###################### "
 copyKnifeRB /data/chef-server/config/admin_knife.rb
 

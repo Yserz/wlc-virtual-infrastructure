@@ -6,12 +6,12 @@ copyKnifeRB(){
 	local new_knife_rb_path=$1
 	local target="/home/vagrant/.chef/knife.rb"
 	mkdir -p /home/vagrant/.chef/ && /bin/cp -rf $new_knife_rb_path $target
-	sed -i -e "$a\node_name                '$HOSTNAME'" $target
+	sed -i -e "\$anode_name                '$HOSTNAME'" $target
 }
 
 sudo su vagrant
 
 echo "INFO: ######################   COPYING CHEF CLIENT CONFIG          ###################### "
-copyKnifeRB /data/config/client_knife.rb
+copyKnifeRB /data/chef-client/config/client_knife.rb
 chown -cR vagrant:vagrant /home/vagrant/.chef/
 chown -cR vagrant:vagrant /etc/chef/client.pem

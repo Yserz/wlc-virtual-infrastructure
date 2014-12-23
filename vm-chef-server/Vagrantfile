@@ -4,11 +4,11 @@
 require 'json'
 require_relative '../xt/preamble.rb'
 require_relative '../xt/hardware.rb'
+require_relative '../xt/cachier_monkeypatch.rb'
 require_relative '../xt/browser.rb'
 
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 ENV['VAGRANT_LOG'] = 'debug'
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
 
@@ -107,13 +107,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     host.vm.box = "wlc/centos-6.6"
     #host.ssh.username = "vagrant"
     
-    host.vm.provision "docker"
-    host.vm.provision "shell", path: "../data/global/script/docker/docker_load_images"
-    host.vm.provision "docker" do |d|
-      d.build_image "/globaldata/container/minivm_runit", args: "-t yserz/docker-vagrant-centos-7-minivm_runit"
-      d.version = :latest # Default is :latest
-    end
-    host.vm.provision "shell", path: "../data/global/script/docker/docker_save_images"
+    # host.vm.provision "docker"
+    # host.vm.provision "shell", path: "../data/global/script/docker/docker_load_images"
+    # host.vm.provision "docker" do |d|
+    #   d.build_image "/globaldata/container/minivm_runit", args: "-t yserz/docker-vagrant-centos-7-minivm_runit"
+    #   d.version = :latest # Default is :latest
+    # end
+    # host.vm.provision "shell", path: "../data/global/script/docker/docker_save_images"
 
 
     if Vagrant.has_plugin?('vagrant-triggers')
@@ -126,12 +126,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     CHEF_JSON = JSON.parse(Pathname(__FILE__).dirname.join('.', 'chef.json').read)
     
     host.vm.provision "chef_solo" do |chef|
-      # Solves the Chef SSL warning
-      # http://stackoverflow.com/questions/22991561/chef-solo-ssl-warning-when-provisioning
       chef.custom_config_path = "vagrant_chef_config"
-      chef.cookbooks_path = "./chef-repo/cookbooks"
-      chef.roles_path = "./chef-repo/roles"
-      chef.data_bags_path = "./chef-repo/data_bags"
+      chef.cookbooks_path = "../vm-chef-workstation/wlc-chef-repo/cookbooks"
+      chef.roles_path = "../vm-chef-workstation/wlc-chef-repo/roles"
+      chef.data_bags_path = "../vm-chef-workstation/wlc-chef-repo/data_bags"
       
       CHEF_JSON['run_list'].each do |recipe|
         puts recipe
@@ -147,9 +145,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
     
     host.vm.provision "shell", path: "../data/chef-server/script/init_chef_server"
-    # TODO make sure chef-repo is up to date before uploading it (install git, git pull...)
-    # TODO login and do as vagrant user
-    # sudo su vagrant && cd /vagrant/chef-repo/ && git pull && sudo knife cookbook upload --all
-    host.vm.provision "shell", inline: "sudo knife cookbook upload --all"
+    host.vm.provision "shell", inline: "sudo rm -rf /root/wlc-chef-repo && sudo git clone https://github.com/welovecoding/wlc-chef-repo.git /root/wlc-chef-repo && sudo knife upload /"
   end
 end
