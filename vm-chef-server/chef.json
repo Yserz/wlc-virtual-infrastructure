@@ -11,9 +11,11 @@
 		},
 		"package_file": "https://opscode-omnibus-packages.s3.amazonaws.com/el/6/x86_64/chef-server-11.1.6-1.el6.x86_64.rpm"
 	},
+  "wlc-chef-server": {
+    "repo_url": "https://github.com/welovecoding/wlc-chef-repo.git",
+    "ssl_verify_mode": ":verify_none"
+  },
 	"run_list": [
-		"recipe[wlc-tar]",
-		"recipe[wlc-git]",
-		"recipe[wlc-chef-server::default]"
+		"recipe[wlc-chef-server::upload]"
 	]
 }

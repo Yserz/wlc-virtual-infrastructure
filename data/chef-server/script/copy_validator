@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# scope guest VM
+
+VALIDATOR_PEM_PATH=/etc/chef-server/chef-validator.pem
+
+echo "INFO: ######################   COPY CHEF KEY FOR CLIENTS       ###################### "
+cp $VALIDATOR_PEM_PATH /data/chef-client/credentials/chef-validator.pem;
